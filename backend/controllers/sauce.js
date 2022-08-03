@@ -99,16 +99,28 @@ exports.likeSauce = (req, res, next) => {
   const like = req.body.like;
   Sauce.findOne({_id: req.params.id})
       .then((sauce) => {
+        if (sauce.likes == undefined) {
+          sauce.likes = 0;
+        }
+        if (sauce.dislikes == undefined) {
+          sauce.dislikes = 0;
+        }
         const userLiked = sauce.usersLiked.find(user => user == userId);
         if (userLiked == undefined) {
-          
+          console.log("no findi")
         }
         const userDisliked = sauce.usersDisliked.find(user => user == userId);
-        if (like > 0) { //like positif
-
+        if (userDisliked == undefined) {
+          console.log("no findi")
         }
-        console.log(sauce);
-        sauce.likes = like;
+        
+
+        if (like > 0) {
+          sauce.likes++;
+        }
+        if (like < 0) {
+          sauce.dislikes++;
+        }
         console.log(sauce, "hello");
       })  
   //  .then(() => {res.status(201).json({message: 'like/dislike saved'})})
