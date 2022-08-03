@@ -1,11 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
-const Sauce = require('./models/Sauce');
+
 const userRoutes = require('./routes/user');
 
 
+const sauceRoutes = require('./routes/sauce');
 
+const path = require('path');
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -24,19 +26,7 @@ mongoose.connect('mongodb+srv://potato:glouglou@cluster0.vanvboo.mongodb.net/?re
 
 
 app.use('/api/auth', userRoutes);
-
-app.post('/api/sauces', (req, res, next) => {
-  console.log(req.body)
-  const sauce = new Sauce({
-    ...req.body
-  });
-  sauce.save()
-    .then(() => res.status(201).json({message: "sauce saved"}))
-    .catch( error => res.status(400).json({error}))
-})
-
-
-
-
+app.use('/api/sauces', sauceRoutes);
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 module.exports = app;
