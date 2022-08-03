@@ -105,26 +105,61 @@ exports.likeSauce = (req, res, next) => {
         if (sauce.dislikes == undefined) {
           sauce.dislikes = 0;
         }
-        const userLiked = sauce.usersLiked.find(user => user == userId);
-        if (userLiked == undefined) {
-          console.log("no findi")
-        }
-        const userDisliked = sauce.usersDisliked.find(user => user == userId);
-        if (userDisliked == undefined) {
-          console.log("no findi")
+        const userLiked = sauce.usersLiked.findIndex(user => user == userId);
+        const userDisliked = sauce.usersDisliked.findIndex(user => user == userId);
+
+        if (userLiked == -1 && userDisliked == -1) {
+          console.log("user didnt vote")
+          if (like > 0) {
+            sauce.like++;
+            sauce.usersLiked.push(userId);
+          }
+          if (like < 0) {
+            sauce.dislike++;
+            sauce.usersDisliked.push(userId);
+          }
         }
         
+        if (userLiked == -1 && userDisliked != -1) {
+          console.log("user liked sauce already")
+          if (like > 0) {
+            res.status(400).json({message: 'cannot relike a sauce'}) //error bonne? 400 a verif
+          }
+          if (like < 0) {
+            sauce.dislike++;
+            sauce.like--;
+            //remove user in like
+            // add user in dislike
+          }
+          if (like == 0) {
+            //remove user in like
+            sauce.like--
+          }
 
-        if (like > 0) {
-          sauce.likes++;
         }
-        if (like < 0) {
-          sauce.dislikes++;
+
+        if (userLiked != -1 && userDisliked == -1) {
+          console.log("user disliked sauce already")
+          if (like > 0) {
+            sauce.dislike--;
+            sauce.like++;
+            //remove user in dislike
+            //add user in like
+          }
+          if (like < 0) {
+            // return error, sauce already disliked
+          }
+          if (like == 0) {
+            // remove user in dislike
+            sauce.dislike--
+          }
         }
-        console.log(sauce, "hello");
+
+        // save sauce and refresh content
+
       })  
   //  .then(() => {res.status(201).json({message: 'like/dislike saved'})})
-      .catch(error => { res.status(400).json({error})})
+      // .catch(error => { res.status(400).json({error})})
 };
 
 
