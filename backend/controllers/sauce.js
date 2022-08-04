@@ -39,7 +39,9 @@ exports.createSauce = (req, res, next) => {
     const sauce = new Sauce({
         ...sauceObject,
         userId: req.auth.userId,
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+        likes: 0,
+        dislikes: 0
     });
   
     sauce.save()
@@ -99,81 +101,64 @@ exports.likeSauce = (req, res, next) => {
   const like = req.body.like;
   Sauce.findOne({_id: req.params.id})
       .then((sauce) => {
-        if (sauce.likes == undefined) {
-          sauce.likes = 0;
-        }
-        if (sauce.dislikes == undefined) {
-          sauce.dislikes = 0;
-        }
+        console.log("inital:",sauce)
         const userLiked = sauce.usersLiked.findIndex(user => user == userId);
         const userDisliked = sauce.usersDisliked.findIndex(user => user == userId);
+        console.log("userLiked:",userLiked)
+        console.log("userDisliked:",userDisliked)
 
         if (userLiked == -1 && userDisliked == -1) {
           console.log("user didnt vote")
           if (like > 0) {
-            sauce.like++;
             sauce.usersLiked.push(userId);
           }
           if (like < 0) {
-            sauce.dislike++;
             sauce.usersDisliked.push(userId);
           }
+          sauce.likes = sauce.usersLiked.length;
+          sauce.dislikes = sauce.usersDisliked.length;
+          sauce.save()
+            .then(() => { res.status(201).json({message: 'sauce saved'})})
+            .catch(error => { res.status(400).json( { error })})
         }
         
-        if (userLiked == -1 && userDisliked != -1) {
+        if (userLiked != -1 && userDisliked == -1) {
           console.log("user liked sauce already")
           if (like > 0) {
-            res.status(400).json({message: 'cannot relike a sauce'}) //error bonne? 400 a verif
+            res.status(400).json({message: 'cannot relike a sauce'}) //bonne error? 400 a verif
           }
           if (like < 0) {
-            sauce.dislike++;
-            sauce.like--;
-            //remove user in like
-            // add user in dislike
+            sauce.usersLiked.splice(userLiked, 1)
+            sauce.usersDisliked.push(userId)
           }
           if (like == 0) {
-            //remove user in like
-            sauce.like--
+            sauce.usersLiked.splice(userLiked, 1)
           }
-
+          sauce.likes = sauce.usersLiked.length;
+          sauce.dislikes = sauce.usersDisliked.length;
+          sauce.save()
+            .then(() => { res.status(201).json({message: 'sauce saved'})})
+            .catch(error => { res.status(400).json( { error })})
         }
 
-        if (userLiked != -1 && userDisliked == -1) {
+        if (userLiked == -1 && userDisliked != -1) {
           console.log("user disliked sauce already")
           if (like > 0) {
-            sauce.dislike--;
-            sauce.like++;
-            //remove user in dislike
-            //add user in like
+            sauce.usersDisliked.splice(userDisliked, 1)
+            sauce.usersLiked.push(userId)
           }
           if (like < 0) {
-            // return error, sauce already disliked
+            res.status(400).json({message: 'cannot redislike a sauce'}) //bonne error? 400 a verif
           }
           if (like == 0) {
-            // remove user in dislike
-            sauce.dislike--
+            sauce.usersDisliked.splice(userDisliked, 1)
           }
+          sauce.likes = sauce.usersLiked.length;
+          sauce.dislikes = sauce.usersDisliked.length;
+          sauce.save()
+            .then(() => { res.status(201).json({message: 'sauce saved'})})
+            .catch(error => { res.status(400).json( { error })})
         }
-
-        // save sauce and refresh content
-
+        console.log("end:",sauce)
       })  
-  //  .then(() => {res.status(201).json({message: 'like/dislike saved'})})
-      // .catch(error => { res.status(400).json({error})})
 };
-
-
-// exports.createSauce = (req, res, next) => {
-//   const sauceObject = JSON.parse(req.body.sauce);
-//   delete sauceObject._id;
-//   delete sauceObject._userId;
-//   const sauce = new Sauce({
-//       ...sauceObject,
-//       userId: req.auth.userId,
-//       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-//   });
-
-//   sauce.save()
-//   .then(() => { res.status(201).json({message: 'sauce saved'})})
-//   .catch(error => { res.status(400).json( { error })})
-// };
