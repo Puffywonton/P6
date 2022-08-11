@@ -1,5 +1,4 @@
 const fs = require('fs');
-const sauce = require('../models/sauce');
 const Sauce = require('../models/sauce');
 
 exports.getAllSauces = (req, res, next) => {
@@ -101,14 +100,9 @@ exports.likeSauce = (req, res, next) => {
   const like = req.body.like;
   Sauce.findOne({_id: req.params.id})
       .then((sauce) => {
-        console.log("inital:",sauce)
         const userLiked = sauce.usersLiked.findIndex(user => user == userId);
         const userDisliked = sauce.usersDisliked.findIndex(user => user == userId);
-        console.log("userLiked:",userLiked)
-        console.log("userDisliked:",userDisliked)
-
         if (userLiked == -1 && userDisliked == -1) {
-          console.log("user didnt vote")
           if (like > 0) {
             sauce.usersLiked.push(userId);
           }
@@ -159,6 +153,5 @@ exports.likeSauce = (req, res, next) => {
             .then(() => { res.status(201).json({message: 'sauce saved'})})
             .catch(error => { res.status(400).json( { error })})
         }
-        console.log("end:",sauce)
       })  
 };
