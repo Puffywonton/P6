@@ -3,8 +3,22 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 
+const passwordValidator = require('password-validator');
+const passwordSchema = new passwordValidator();
+
+passwordSchema
+.is().min(8)
+.is().max(100)
+.is().digits(2)
+// question, je peux mettre le passwordValidator dans un model ?
+
+//PROB: error messages ne s'affichent pas :S
+
 exports.signup = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10)
+    var password = req.body.password
+    console.log(passwordSchema.validate(password))
+    if (passwordSchema.validate(password)){
+        bcrypt.hash(password, 10)
         .then(hash => {
             const user = new User({
                 email: req.body.email,
@@ -15,6 +29,11 @@ exports.signup = (req, res, next) => {
                 .catch(error => res.status(400).json({ error }));
         })
         .catch(error => res.status(500).json({ error }));
+    }else{
+        // res.status(406).json({message: 'password between 8-100 characters with 2 numbers min'})
+        res.status(406).send('tagueule');
+    }
+    
 };
 
 exports.login = (req, res, next) => {
