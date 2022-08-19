@@ -119,7 +119,7 @@ exports.likeSauce = (req, res, next) => {
         if (userLiked != -1 && userDisliked == -1) {
           console.log("user liked sauce already")
           if (like > 0) {
-            res.status(400).json({message: 'cannot relike a sauce'}) //bonne error? 400 a verif
+            res.status(400).json({message: 'cannot relike a sauce'})
           }
           if (like < 0) {
             sauce.usersLiked.splice(userLiked, 1)
@@ -142,7 +142,7 @@ exports.likeSauce = (req, res, next) => {
             sauce.usersLiked.push(userId)
           }
           if (like < 0) {
-            res.status(400).json({message: 'cannot redislike a sauce'}) //bonne error? 400 a verif
+            res.status(400).json({message: 'cannot redislike a sauce'})
           }
           if (like == 0) {
             sauce.usersDisliked.splice(userDisliked, 1)

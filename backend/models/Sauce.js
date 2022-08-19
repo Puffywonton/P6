@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 
-//c'est bon ca ? probs avec likes disklikes!!
+
 const sauceSchema = mongoose.Schema({
     userId: {type: String, required: true},
     name: {type: String, required: true},

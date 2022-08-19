@@ -1,4 +1,8 @@
+
+
 const express = require('express');
+const helmet = require("helmet");
+
 const mongoose = require('mongoose');
 const app = express();
 
@@ -9,6 +13,8 @@ const sauceRoutes = require('./routes/sauce');
 
 const path = require('path');
 
+
+
 app.use(express.json());
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,8 +23,11 @@ app.use((req, res, next) => {
     next();
 });
 
+// QUESTION HELMET ??? est ce que je peux foutre le crossorigin machin dans le setHeader ???
 
-mongoose.connect('mongodb+srv://potato:glouglou@cluster0.vanvboo.mongodb.net/?retryWrites=true&w=majority',
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
+
+mongoose.connect('mongodb+srv://'+process.env.MOONGOOSE_ID+':'+process.env.MOONGOOSE_PASSWORD+'@cluster0.vanvboo.mongodb.net/?retryWrites=true&w=majority',
   { useNewUrlParser: true,
     useUnifiedTopology: true })
 .then(() => console.log('Connexion à MongoDB réussie !'))
