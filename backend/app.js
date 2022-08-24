@@ -23,7 +23,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// QUESTION HELMET ??? est ce que je peux foutre le crossorigin machin dans le setHeader ???
 
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
