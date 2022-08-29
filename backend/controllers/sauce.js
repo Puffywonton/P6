@@ -95,7 +95,6 @@ exports.deleteSauce = (req, res, next) => {
 
 
 exports.likeSauce = (req, res, next) => {
-  console.log(req.body)
   const userId = req.body.userId;
   const like = req.body.like;
   Sauce.findOne({_id: req.params.id})
@@ -117,7 +116,6 @@ exports.likeSauce = (req, res, next) => {
         }
         
         if (userLiked != -1 && userDisliked == -1) {
-          console.log("user liked sauce already")
           if (like > 0) {
             res.status(400).json({message: 'cannot relike a sauce'})
           }
@@ -136,7 +134,6 @@ exports.likeSauce = (req, res, next) => {
         }
 
         if (userLiked == -1 && userDisliked != -1) {
-          console.log("user disliked sauce already")
           if (like > 0) {
             sauce.usersDisliked.splice(userDisliked, 1)
             sauce.usersLiked.push(userId)

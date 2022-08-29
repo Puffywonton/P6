@@ -33,7 +33,6 @@ exports.login = (req, res, next) => {
             }
             bcrypt.compare(req.body.password, user.password)
                 .then(valid => {
-                    console.log(valid)
                     if (!valid) {
                         return res.status(401).json({ message: 'login/password incorrect' });
                     }
