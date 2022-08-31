@@ -24,7 +24,7 @@ app.use((req, res, next) => {
 
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
-mongoose.connect('mongodb+srv://'+process.env.MOONGOOSE_ID+':'+process.env.MOONGOOSE_PASSWORD+'@cluster0.vanvboo.mongodb.net/?retryWrites=true&w=majority',
+mongoose.connect(process.env.MOONGOOSE,
   { useNewUrlParser: true,
     useUnifiedTopology: true })
 .then(() => console.log('Connexion à MongoDB réussie !'))
