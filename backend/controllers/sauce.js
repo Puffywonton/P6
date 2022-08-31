@@ -51,7 +51,6 @@ exports.createSauce = (req, res, next) => {
 
 
 exports.modifySauce = (req, res, next) => {
-  console.log(req.body.sauce)
   Sauce.findOne({_id: req.params.id})
     .then((sauce) => {
       if (sauce.userId != req.auth.userId) {
@@ -64,7 +63,6 @@ exports.modifySauce = (req, res, next) => {
           imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
         } : { ...req.body };
         delete sauceObject._userId;
-        console.log(sauceObject,'coucou')
         Sauce.updateOne({ _id: req.params.id}, { ...sauceObject, _id: req.params.id})
               .then(() => res.status(200).json({message : 'sauce saved'}))
               .catch(error => res.status(401).json({ error }));
@@ -73,23 +71,6 @@ exports.modifySauce = (req, res, next) => {
     .catch((error) => {
       res.status(400).json({ error });
     });
-
-  // console.log(req.body)
-  
-
-  
-
-  // Sauce.findOne({_id: req.params.id})
-  //     .then((sauce) => {
-  //         if (sauce.userId != req.auth.userId) {
-  //             res.status(401).json({ message : 'Not authorized'});
-  //         } else {
-  //             Sauce.updateOne({ _id: req.params.id}, { ...sauceObject, _id: req.params.id})
-  //             .then(() => res.status(200).json({message : 'sauce saved'}))
-  //             .catch(error => res.status(401).json({ error }));
-  //         }
-  //     })
-      
 };
 
 
