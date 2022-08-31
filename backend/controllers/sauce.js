@@ -52,7 +52,8 @@ exports.createSauce = (req, res, next) => {
 
 exports.modifySauce = (req, res, next) => {
   const sauceObject = req.file ? {
-      ...JSON.parse(req.body.thing),
+      ...req.body,
+      userId: req.auth.userId,
       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
   } : { ...req.body };
 
@@ -99,13 +100,16 @@ exports.likeSauce = (req, res, next) => {
   const like = req.body.like;
   Sauce.findOne({_id: req.params.id})
       .then((sauce) => {
-        const userLiked = sauce.usersLiked.findIndex(user => user == userId);
-        const userDisliked = sauce.usersDisliked.findIndex(user => user == userId);
-        if (userLiked == -1 && userDisliked == -1) {
-          if (like > 0) {
-            sauce.usersLiked.push(userId);
-          }
-          if (like < 0) {
+        if (userId != req.auth.userId) {
+          res.status(401).json({message: "not authorized"});
+        }else{
+          const userLiked = sauce.usersLiked.findIndex(user => user == userId);
+          const userDisliked = sauce.usersDisliked.findIndex(user => user == userId);
+          if (userLiked == -1 && userDisliked == -1) {
+            if (like > 0) {
+              sauce.usersLiked.push(userId);
+            }
+            if (like < 0) {
             sauce.usersDisliked.push(userId);
           }
           sauce.likes = sauce.usersLiked.length;
@@ -113,42 +117,41 @@ exports.likeSauce = (req, res, next) => {
           sauce.save()
             .then(() => { res.status(201).json({message: 'sauce saved'})})
             .catch(error => { res.status(400).json( { error })})
-        }
-        
-        if (userLiked != -1 && userDisliked == -1) {
-          if (like > 0) {
-            res.status(400).json({message: 'cannot relike a sauce'})
+          }        
+          if (userLiked != -1 && userDisliked == -1) {
+            if (like > 0) {
+              res.status(400).json({message: 'cannot relike a sauce'})
+            }
+            if (like < 0) {
+              sauce.usersLiked.splice(userLiked, 1)
+              sauce.usersDisliked.push(userId)
+            }
+            if (like == 0) {
+              sauce.usersLiked.splice(userLiked, 1)
+            }
+            sauce.likes = sauce.usersLiked.length;
+            sauce.dislikes = sauce.usersDisliked.length;
+            sauce.save()
+              .then(() => { res.status(201).json({message: 'sauce saved'})})
+              .catch(error => { res.status(400).json( { error })})
           }
-          if (like < 0) {
-            sauce.usersLiked.splice(userLiked, 1)
-            sauce.usersDisliked.push(userId)
+          if (userLiked == -1 && userDisliked != -1) {
+            if (like > 0) {
+              sauce.usersDisliked.splice(userDisliked, 1)
+              sauce.usersLiked.push(userId)
+            }
+            if (like < 0) {
+              res.status(400).json({message: 'cannot redislike a sauce'})
+            }
+            if (like == 0) {
+              sauce.usersDisliked.splice(userDisliked, 1)
+            }
+            sauce.likes = sauce.usersLiked.length;
+            sauce.dislikes = sauce.usersDisliked.length;
+            sauce.save()
+              .then(() => { res.status(201).json({message: 'sauce saved'})})
+              .catch(error => { res.status(400).json( { error })})
           }
-          if (like == 0) {
-            sauce.usersLiked.splice(userLiked, 1)
-          }
-          sauce.likes = sauce.usersLiked.length;
-          sauce.dislikes = sauce.usersDisliked.length;
-          sauce.save()
-            .then(() => { res.status(201).json({message: 'sauce saved'})})
-            .catch(error => { res.status(400).json( { error })})
-        }
-
-        if (userLiked == -1 && userDisliked != -1) {
-          if (like > 0) {
-            sauce.usersDisliked.splice(userDisliked, 1)
-            sauce.usersLiked.push(userId)
-          }
-          if (like < 0) {
-            res.status(400).json({message: 'cannot redislike a sauce'})
-          }
-          if (like == 0) {
-            sauce.usersDisliked.splice(userDisliked, 1)
-          }
-          sauce.likes = sauce.usersLiked.length;
-          sauce.dislikes = sauce.usersDisliked.length;
-          sauce.save()
-            .then(() => { res.status(201).json({message: 'sauce saved'})})
-            .catch(error => { res.status(400).json( { error })})
         }
       })
       .catch( error => {
